@@ -11,7 +11,7 @@ This project provides a simple RESTful API for a banking application using Sprin
 
 - **Java**: The primary programming language used.
 - **Spring Boot**: Framework to ease the bootstrapping and development of new Spring Applications.
-- **Postgres**: In-memory database for integration tests.
+- **Postgres**: Relational database to store account information.
 - **H2 Database**: In-memory database for integration tests.
 - **JPA (Java Persistence API)**: Java API specification that describes the management of relational data in applications.
 
@@ -36,7 +36,7 @@ This project provides a simple RESTful API for a banking application using Sprin
 git clone https://github.com/popovychwrk/banking-api.git
 cd banking-api
 ```
-2. **Set up the database**
+2. **Set up the Postgres database**
 ```bash
 docker-compose up
 ```
