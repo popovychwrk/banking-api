@@ -1,7 +1,7 @@
 package org.example.banking.repositories;
 
 import org.example.banking.TestDataUtil;
-import org.example.banking.domain.Account;
+import org.example.banking.domain.entities.AccountEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,72 +28,72 @@ public class AccountEntityRepositoryIntegrationTests {
 
     @Test
     public void testThatAccountCanBeCreatedAndRecalled() {
-        Account account = TestDataUtil.createTestAccountA();
-        underTest.save(account);
-        Optional<Account> result = underTest.findById(account.getId());
+        AccountEntity accountEntity = TestDataUtil.createTestAccountEntityA();
+        underTest.save(accountEntity);
+        Optional<AccountEntity> result = underTest.findById(accountEntity.getId());
         assertThat(result).isPresent();
-        assertThat(result.get()).isEqualTo(account);
+        assertThat(result.get()).isEqualTo(accountEntity);
     }
 
     @Test
     public void testThatMultipleAccountsCanBeCreatedAndRecalled() {
-        Account accountA = TestDataUtil.createTestAccountA();
-        Account accountB = TestDataUtil.createTestAccountB();
-        Account accountC = TestDataUtil.createTestAccountC();
-        underTest.save(accountA);
-        underTest.save(accountB);
-        underTest.save(accountC);
+        AccountEntity accountEntityA = TestDataUtil.createTestAccountEntityA();
+        AccountEntity accountEntityB = TestDataUtil.createTestAccountEntityB();
+        AccountEntity accountEntityC = TestDataUtil.createTestAccountEntityC();
+        underTest.save(accountEntityA);
+        underTest.save(accountEntityB);
+        underTest.save(accountEntityC);
 
-        Iterable<Account> result = underTest.findAll();
+        Iterable<AccountEntity> result = underTest.findAll();
         assertThat(result).hasSize(3);
-        assertThat(result).containsExactly(accountA, accountB, accountC);
+        assertThat(result).containsExactly(accountEntityA, accountEntityB, accountEntityC);
     }
 
     @Test
     public void testThatAccountCanBeUpdated() {
-        Account account = TestDataUtil.createTestAccountA();
-        underTest.save(account);
-        account.setBalance(new BigDecimal("1000.00"));
-        underTest.save(account);
-        Optional<Account> result = underTest.findById(account.getId());
+        AccountEntity accountEntity = TestDataUtil.createTestAccountEntityA();
+        underTest.save(accountEntity);
+        accountEntity.setBalance(new BigDecimal("1000.00"));
+        underTest.save(accountEntity);
+        Optional<AccountEntity> result = underTest.findById(accountEntity.getId());
         assertThat(result).isPresent();
-        assertThat(result.get()).isEqualTo(account);
+        assertThat(result.get()).isEqualTo(accountEntity);
     }
 
     @Test
     public void testThatAccountCanBeDeleted() {
-        Account account = TestDataUtil.createTestAccountA();
-        underTest.save(account);
-        underTest.deleteById(account.getId());
-        Optional<Account> result = underTest.findById(account.getId());
+        AccountEntity accountEntity = TestDataUtil.createTestAccountEntityA();
+        underTest.save(accountEntity);
+        underTest.deleteById(accountEntity.getId());
+        Optional<AccountEntity> result = underTest.findById(accountEntity.getId());
         assertThat(result).isEmpty();
     }
 
     @Test
     public void testThatGetAccountWithBalanceLessThan() {
-        Account accountA = TestDataUtil.createTestAccountA();
-        Account accountB = TestDataUtil.createTestAccountB();
-        Account accountC = TestDataUtil.createTestAccountC();
-        underTest.save(accountA);
-        underTest.save(accountB);
-        underTest.save(accountC);
+        AccountEntity accountEntityA = TestDataUtil.createTestAccountEntityA();
+        AccountEntity accountEntityB = TestDataUtil.createTestAccountEntityB();
+        AccountEntity accountEntityC = TestDataUtil.createTestAccountEntityC();
+        underTest.save(accountEntityA);
+        underTest.save(accountEntityB);
+        underTest.save(accountEntityC);
 
-        Iterable<Account> result = underTest.findByBalanceLessThan(new BigDecimal("300.00"));
+        Iterable<AccountEntity> result = underTest.findByBalanceLessThan(new BigDecimal("300.00"));
         assertThat(result).hasSize(2);
-        assertThat(result).containsExactly(accountA, accountB);
+        assertThat(result).containsExactly(accountEntityA, accountEntityB);
     }
 
     @Test
     public void testThatGetAccountWithGreaterThenZero() {
-        Account accountA = TestDataUtil.createTestAccountA();
-        Account accountB = TestDataUtil.createTestAccountB();
-        Account accountC = TestDataUtil.createTestAccountC();
-        underTest.save(accountA);
-        underTest.save(accountB);
-        underTest.save(accountC);
+        AccountEntity accountEntityA = TestDataUtil.createTestAccountEntityA();
+        AccountEntity accountEntityB = TestDataUtil.createTestAccountEntityB();
+        AccountEntity accountEntityC = TestDataUtil.createTestAccountEntityC();
+        underTest.save(accountEntityA);
+        underTest.save(accountEntityB);
+        underTest.save(accountEntityC);
 
-        Iterable<Account> result = underTest.findByBalanceGreaterThanZero();
+        Iterable<AccountEntity> result = underTest.findByBalanceGreaterThanZero();
         assertThat(result).hasSize(3);
-        assertThat(result).containsExactly(accountA, accountB, accountC);
+        assertThat(result).containsExactly(accountEntityA, accountEntityB, accountEntityC);
     }
 }

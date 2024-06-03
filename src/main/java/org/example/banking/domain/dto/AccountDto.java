@@ -1,6 +1,5 @@
-package org.example.banking.domain;
+package org.example.banking.domain.dto;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,11 +11,8 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Entity
-@Table(name = "accounts")
-public class Account {
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "account_id_seq")
+public class AccountDto {
+
     private Long id;
     private String accountNumber;
     private BigDecimal balance;
