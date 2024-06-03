@@ -18,6 +18,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.math.BigDecimal;
+
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -41,7 +43,7 @@ public class AccountControllerIntegrationTest {
         testAccountEntityA.setId(null);
         String accountJson = objectMapper.writeValueAsString(testAccountEntityA);
         mockMvc.perform(
-                        MockMvcRequestBuilders.post("/accounts")
+                        MockMvcRequestBuilders.post("/api/accounts")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(accountJson))
                 .andExpect(MockMvcResultMatchers.status().isCreated());
@@ -53,7 +55,7 @@ public class AccountControllerIntegrationTest {
         testAccount.setId(null);
         String accountJson = objectMapper.writeValueAsString(testAccount);
         mockMvc.perform(
-                        MockMvcRequestBuilders.post("/accounts")
+                        MockMvcRequestBuilders.post("/api/accounts")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(accountJson))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNumber())
@@ -64,7 +66,7 @@ public class AccountControllerIntegrationTest {
     @Test
     public void testThatFindAllAccountsReturnsHttp200() throws Exception {
         mockMvc.perform(
-                        MockMvcRequestBuilders.get("/accounts"))
+                        MockMvcRequestBuilders.get("/api/accounts"))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
@@ -77,7 +79,7 @@ public class AccountControllerIntegrationTest {
         accountService.createAccount(testAccountEntityB);
         accountService.createAccount(testAccountEntityC);
         mockMvc.perform(
-                        MockMvcRequestBuilders.get("/accounts"))
+                        MockMvcRequestBuilders.get("/api/accounts"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content", Matchers.hasSize(3)));
     }
 
@@ -86,14 +88,14 @@ public class AccountControllerIntegrationTest {
         AccountEntity testAccountEntityA = TestDataUtil.createTestAccountEntityA();
         accountService.createAccount(testAccountEntityA);
         mockMvc.perform(
-                        MockMvcRequestBuilders.get("/accounts/" + testAccountEntityA.getId()))
+                        MockMvcRequestBuilders.get("/api/accounts/" + testAccountEntityA.getId()))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
     public void testThatFindAccountByIdReturnsHttp404WhenAccountDoesNotExist() throws Exception {
         mockMvc.perform(
-                        MockMvcRequestBuilders.get("/accounts/"))
+                        MockMvcRequestBuilders.get("/api/accounts/"))
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
@@ -102,7 +104,7 @@ public class AccountControllerIntegrationTest {
         AccountEntity testAccountEntityA = TestDataUtil.createTestAccountEntityA();
         accountService.createAccount(testAccountEntityA);
         mockMvc.perform(
-                        MockMvcRequestBuilders.get("/accounts/" + testAccountEntityA.getId()))
+                        MockMvcRequestBuilders.get("/api/accounts/" + testAccountEntityA.getId()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNumber())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.accountNumber")
                         .value(testAccountEntityA.getAccountNumber()))
@@ -117,7 +119,7 @@ public class AccountControllerIntegrationTest {
         testAccountEntityA.setBalance(testAccountEntityA.getBalance().add(testAccountEntityA.getBalance()));
         String accountJson = objectMapper.writeValueAsString(testAccountEntityA);
         mockMvc.perform(
-                        MockMvcRequestBuilders.put("/accounts/" + testAccountEntityA.getId())
+                        MockMvcRequestBuilders.put("/api/accounts/" + testAccountEntityA.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(accountJson))
                 .andExpect(MockMvcResultMatchers.status().isOk());
@@ -129,7 +131,7 @@ public class AccountControllerIntegrationTest {
         testAccountEntityA.setBalance(testAccountEntityA.getBalance().add(testAccountEntityA.getBalance()));
         String accountJson = objectMapper.writeValueAsString(testAccountEntityA);
         mockMvc.perform(
-                        MockMvcRequestBuilders.put("/accounts/" + testAccountEntityA.getId())
+                        MockMvcRequestBuilders.put("/api/accounts/" + testAccountEntityA.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(accountJson))
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
@@ -146,7 +148,7 @@ public class AccountControllerIntegrationTest {
         String accountJson = objectMapper.writeValueAsString(authorDto);
 
         mockMvc.perform(
-                        MockMvcRequestBuilders.put("/accounts/" + savedAuthor.getId())
+                        MockMvcRequestBuilders.put("/api/accounts/" + savedAuthor.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(accountJson))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(savedAuthor.getId()))
@@ -165,7 +167,7 @@ public class AccountControllerIntegrationTest {
         testAccountDtoA.setAccountNumber("123123123");
         String accountJson = objectMapper.writeValueAsString(testAccountDtoA);
         mockMvc.perform(
-                        MockMvcRequestBuilders.patch("/accounts/" + savedAccount.getId())
+                        MockMvcRequestBuilders.patch("/api/accounts/" + savedAccount.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(accountJson))
                 .andExpect(MockMvcResultMatchers.status().isOk());
@@ -177,7 +179,7 @@ public class AccountControllerIntegrationTest {
         testAccountDtoA.setAccountNumber("123123123");
         String accountJson = objectMapper.writeValueAsString(testAccountDtoA);
         mockMvc.perform(
-                        MockMvcRequestBuilders.patch("/accounts/1")
+                        MockMvcRequestBuilders.patch("/api/accounts/1")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(accountJson))
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
@@ -193,7 +195,7 @@ public class AccountControllerIntegrationTest {
         String accountJson = objectMapper.writeValueAsString(testAccountDto);
 
         mockMvc.perform(
-                        MockMvcRequestBuilders.patch("/accounts/" + savedAccount.getId())
+                        MockMvcRequestBuilders.patch("/api/accounts/" + savedAccount.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(accountJson))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(savedAccount.getId()))
@@ -208,15 +210,101 @@ public class AccountControllerIntegrationTest {
         AccountEntity testAccountEntityA = TestDataUtil.createTestAccountEntityA();
         AccountEntity savedAccount = accountService.createAccount(testAccountEntityA);
         mockMvc.perform(
-                        MockMvcRequestBuilders.delete("/accounts/" + savedAccount.getId()))
+                        MockMvcRequestBuilders.delete("/api/accounts/" + savedAccount.getId()))
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 
     @Test
     public void testThatDeleteAccountReturnsHttp404WhenNoAccountExists() throws Exception {
         mockMvc.perform(
-                        MockMvcRequestBuilders.delete("/accounts/1"))
+                        MockMvcRequestBuilders.delete("/api/accounts/1"))
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
+    @Test
+    public void testThatDepositSuccessfullyReturnsHttp200() throws Exception {
+        AccountEntity testAccountEntityA = TestDataUtil.createTestAccountEntityA();
+        AccountEntity savedAccount = accountService.createAccount(testAccountEntityA);
+        BigDecimal amount = new BigDecimal("100.00");
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post("/api/accounts/deposit/" + savedAccount.getId())
+                                .param("amount", amount.toString()))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    public void testThatDepositReturnsUpdatedAccount() throws Exception {
+        AccountEntity savedAccount = TestDataUtil.createTestAccountEntityA();
+        accountService.createAccount(savedAccount);
+        BigDecimal amount = new BigDecimal("100.00");
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post("/api/accounts/deposit/" + savedAccount.getId())
+                                .param("amount", amount.toString()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(savedAccount.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.accountNumber")
+                        .value(savedAccount.getAccountNumber()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.balance")
+                        .value(savedAccount.getBalance().add(amount).doubleValue()));
+    }
+
+    @Test
+    public void testThatWithdrawSuccessfullyReturnsHttp200() throws Exception {
+        AccountEntity testAccountEntityA = TestDataUtil.createTestAccountEntityA();
+        AccountEntity savedAccount = accountService.createAccount(testAccountEntityA);
+        BigDecimal amount = new BigDecimal("100.00");
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post("/api/accounts/withdraw/" + savedAccount.getId())
+                                .param("amount", amount.toString()))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    public void testThatWithdrawReturnsUpdatedAccount() throws Exception {
+        AccountEntity savedAccount = TestDataUtil.createTestAccountEntityA();
+        accountService.createAccount(savedAccount);
+        BigDecimal amount = new BigDecimal("100.00");
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post("/api/accounts/withdraw/" + savedAccount.getId())
+                                .param("amount", amount.toString()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(savedAccount.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.accountNumber")
+                        .value(savedAccount.getAccountNumber()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.balance")
+                        .value(savedAccount.getBalance().subtract(amount).doubleValue()));
+    }
+
+    @Test
+    public void testThatTransferSuccessfullyReturnsHttp200() throws Exception {
+        AccountEntity testAccountEntityA = TestDataUtil.createTestAccountEntityA();
+        AccountEntity testAccountEntityB = TestDataUtil.createTestAccountEntityB();
+        AccountEntity savedAccountA = accountService.createAccount(testAccountEntityA);
+        AccountEntity savedAccountB = accountService.createAccount(testAccountEntityB);
+        BigDecimal amount = new BigDecimal("100.00");
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post("/api/accounts/transfer/")
+                                .param("fromAccountId", savedAccountA.getId().toString())
+                                .param("toAccountId", savedAccountB.getId().toString())
+                                .param("amount", amount.toString()))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    public void testThatTransferReturnsUpdatedAccounts() throws Exception {
+        AccountEntity testAccountEntityA = TestDataUtil.createTestAccountEntityA();
+        AccountEntity testAccountEntityB = TestDataUtil.createTestAccountEntityB();
+        AccountEntity savedAccountA = accountService.createAccount(testAccountEntityA);
+        AccountEntity savedAccountB = accountService.createAccount(testAccountEntityB);
+        BigDecimal amount = new BigDecimal("100.00");
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post("/api/accounts/transfer/")
+                                .param("fromAccountId", savedAccountA.getId().toString())
+                                .param("toAccountId", savedAccountB.getId().toString())
+                                .param("amount", amount.toString()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(savedAccountA.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.accountNumber")
+                        .value(savedAccountA.getAccountNumber()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.balance")
+                        .value(savedAccountA.getBalance().subtract(amount).doubleValue()));
+
+    }
 }

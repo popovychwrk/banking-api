@@ -10,9 +10,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @RestController
+@RequestMapping("/api/accounts")
 public class AccountController {
 
     private final AccountService accountService;
@@ -24,33 +26,27 @@ public class AccountController {
         this.accountMapper = accountMapper;
     }
 
-    @PostMapping(path = "/accounts")
+    @PostMapping()
     public ResponseEntity<AccountDto> createAccount(@RequestBody AccountDto accountDto) {
         AccountEntity accountEntity = accountMapper.mapFrom(accountDto);
         AccountEntity savedAccountEntity = accountService.createAccount(accountEntity);
         return new ResponseEntity<>(accountMapper.mapTo(savedAccountEntity), HttpStatus.CREATED);
     }
 
-//    @GetMapping(path = "/accounts")
-//    public List<AccountDto> getAllAccounts() {
-//        List<AccountEntity> accounts = accountService.findAll();
-//        return accounts.stream().map(accountMapper::mapTo).toList();
-//    }
-
-    @GetMapping(path = "/accounts")
+    @GetMapping()
     public Page<AccountDto> getAllAccounts(Pageable pageable) {
         Page<AccountEntity> accounts = accountService.findAll(pageable);
         return accounts.map(accountMapper::mapTo);
     }
 
-    @GetMapping(path = "/accounts/{id}")
+    @GetMapping(path = "/{id}")
     public ResponseEntity<AccountDto> getAccountById(@PathVariable Long id) {
         Optional<AccountEntity> accountEntity = accountService.findById(id);
         return accountEntity.map(account -> new ResponseEntity<>(accountMapper.mapTo(account), HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @PutMapping(path = "/accounts/{id}")
+    @PutMapping(path = "/{id}")
     public ResponseEntity<AccountDto> updateAccount(@PathVariable Long id,
                                                     @RequestBody AccountDto accountDto) {
         if (!accountService.isExist(id)) {
@@ -63,7 +59,7 @@ public class AccountController {
         return new ResponseEntity<>(accountMapper.mapTo(savedAccountEntity), HttpStatus.OK);
     }
 
-    @PatchMapping(path = "/accounts/{id}")
+    @PatchMapping(path = "/{id}")
     public ResponseEntity<AccountDto> partialAccount(@PathVariable Long id,
                                                      @RequestBody AccountDto accountDto) {
         if (!accountService.isExist(id)) {
@@ -75,7 +71,7 @@ public class AccountController {
         return new ResponseEntity<>(accountMapper.mapTo(updatedEntity), HttpStatus.OK);
     }
 
-    @DeleteMapping(path = "/accounts/{id}")
+    @DeleteMapping(path = "/{id}")
     public ResponseEntity<Void> deleteAccount(@PathVariable Long id) {
         if (!accountService.isExist(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -83,5 +79,27 @@ public class AccountController {
 
         accountService.deleteAccount(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PostMapping(path = "/deposit/{id}")
+    public ResponseEntity<AccountDto> deposit(@PathVariable Long id,
+                                              @RequestParam BigDecimal amount) {
+        AccountDto accountDto = accountService.deposit(id, amount);
+        return new ResponseEntity<>(accountDto, HttpStatus.OK);
+    }
+
+    @PostMapping(path = "/withdraw/{id}")
+    public ResponseEntity<AccountDto> withdraw(@PathVariable Long id,
+                                               @RequestParam BigDecimal amount) {
+        AccountDto accountDto = accountService.withdraw(id, amount);
+        return new ResponseEntity<>(accountDto, HttpStatus.OK);
+    }
+
+    @PostMapping(path = "/transfer/")
+    public ResponseEntity<AccountDto> transfer(@RequestParam Long fromAccountId,
+                                               @RequestParam Long toAccountId,
+                                               @RequestParam BigDecimal amount) {
+        AccountDto accountDto = accountService.transfer(fromAccountId, toAccountId, amount);
+        return new ResponseEntity<>(accountDto, HttpStatus.OK);
     }
 }

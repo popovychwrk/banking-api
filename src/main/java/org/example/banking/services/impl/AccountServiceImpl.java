@@ -1,5 +1,6 @@
 package org.example.banking.services.impl;
 
+import org.example.banking.domain.dto.AccountDto;
 import org.example.banking.domain.entities.AccountEntity;
 import org.example.banking.repositories.AccountRepository;
 import org.example.banking.services.AccountService;
@@ -7,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
@@ -66,5 +68,41 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public void deleteAccount(Long id) {
         accountRepository.deleteById(id);
+    }
+
+    @Override
+    public AccountDto deposit(Long id, BigDecimal amount) {
+        return accountRepository.findById(id).map(accountEntity -> {
+            accountEntity.setBalance(accountEntity.getBalance().add(amount));
+            return accountRepository.save(accountEntity);
+        }).map(accountEntity -> new AccountDto(accountEntity.getId(), accountEntity.getAccountNumber(), accountEntity.getBalance()))
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+    }
+
+    @Override
+    public AccountDto withdraw(Long id, BigDecimal amount) {
+        return accountRepository.findById(id).map(accountEntity -> {
+            accountEntity.setBalance(accountEntity.getBalance().subtract(amount));
+            return accountRepository.save(accountEntity);
+        }).map(accountEntity -> new AccountDto(accountEntity.getId(), accountEntity.getAccountNumber(), accountEntity.getBalance()))
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+    }
+
+    @Override
+    public AccountDto transfer(Long fromId, Long toId, BigDecimal amount) {
+        AccountEntity fromAccount = accountRepository.findById(fromId)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+
+        AccountEntity toAccount = accountRepository.findById(toId)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+
+        fromAccount.setBalance(fromAccount.getBalance().subtract(amount));
+        toAccount.setBalance(toAccount.getBalance().add(amount));
+
+        accountRepository.save(fromAccount);
+        accountRepository.save(toAccount);
+
+        return accountRepository.findById(fromId).map(accountEntity -> new AccountDto(accountEntity.getId(), accountEntity.getAccountNumber(), accountEntity.getBalance()))
+                .orElseThrow(() -> new RuntimeException("Account not found"));
     }
 }
