@@ -52,6 +52,4 @@ public final class TestDataUtil {
                 .balance(new BigDecimal("300.00"))
                 .build();
     }
-
-
 }
