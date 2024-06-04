@@ -7,6 +7,7 @@ import org.example.banking.services.AccountService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -71,7 +72,12 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    @Transactional
     public AccountDto deposit(Long id, BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Deposit amount must be greater than zero");
+        }
+
         return accountRepository.findById(id).map(accountEntity -> {
             accountEntity.setBalance(accountEntity.getBalance().add(amount));
             return accountRepository.save(accountEntity);
@@ -80,21 +86,40 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    @Transactional
     public AccountDto withdraw(Long id, BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Withdrawal amount must be greater than zero");
+        }
+
         return accountRepository.findById(id).map(accountEntity -> {
+            if (accountEntity.getBalance().compareTo(amount) < 0) {
+                throw new RuntimeException("Insufficient funds in account ID: " + id);
+            }
+
             accountEntity.setBalance(accountEntity.getBalance().subtract(amount));
-            return accountRepository.save(accountEntity);
-        }).map(accountEntity -> new AccountDto(accountEntity.getId(), accountEntity.getAccountNumber(), accountEntity.getBalance()))
-                .orElseThrow(() -> new RuntimeException("Account not found"));
+            accountRepository.save(accountEntity);
+
+            return new AccountDto(accountEntity.getId(), accountEntity.getAccountNumber(), accountEntity.getBalance());
+        }).orElseThrow(() -> new RuntimeException("Account not found with ID: " + id));
     }
 
     @Override
+    @Transactional
     public AccountDto transfer(Long fromId, Long toId, BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Transfer amount must be greater than zero");
+        }
+
         AccountEntity fromAccount = accountRepository.findById(fromId)
                 .orElseThrow(() -> new RuntimeException("Account not found"));
 
         AccountEntity toAccount = accountRepository.findById(toId)
                 .orElseThrow(() -> new RuntimeException("Account not found"));
+
+        if (fromAccount.getBalance().compareTo(amount) < 0) {
+            throw new RuntimeException("Insufficient balance in the sender's account");
+        }
 
         fromAccount.setBalance(fromAccount.getBalance().subtract(amount));
         toAccount.setBalance(toAccount.getBalance().add(amount));
